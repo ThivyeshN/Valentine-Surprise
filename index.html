@@ -12,11 +12,27 @@ body {
   background: linear-gradient(135deg,#ff4e8a,#ff9acb);
   color:white;
   overflow-x:hidden;
-  transition:1.5s;
+  transition:2s;
 }
 
 .dark {
   background: radial-gradient(circle at top,#1a001f,#000);
+}
+
+/* Romantic glow */
+body::after{
+  content:"";
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:radial-gradient(circle,#ff99cc33 0%,transparent 70%);
+  pointer-events:none;
+  animation:glow 4s infinite alternate;
+}
+
+@keyframes glow{
+  from{opacity:0.4;}
+  to{opacity:0.8;}
 }
 
 h1 { margin-top:40px; }
@@ -37,6 +53,12 @@ button {
   color:#ff4e8a;
   font-weight:bold;
   margin-top:15px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:scale(1.05);
 }
 
 .coupon {
@@ -50,13 +72,7 @@ button {
   position:relative;
   display:none;
   overflow:hidden;
-  box-shadow:0 0 30px rgba(255,255,255,0.8);
-  animation:glow 2s infinite alternate;
-}
-
-@keyframes glow {
-  from { box-shadow:0 0 20px pink; }
-  to { box-shadow:0 0 40px white; }
+  box-shadow:0 0 40px rgba(255,255,255,0.9);
 }
 
 canvas {
@@ -75,34 +91,18 @@ canvas {
   white-space:pre-wrap;
   font-style:italic;
   font-size:18px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:1.5s ease;
 }
 
-.heart {
-  position:fixed;
-  bottom:-10px;
-  font-size:20px;
-  animation:float 6s linear infinite;
-}
-
-@keyframes float {
-  0%{transform:translateY(0);opacity:1;}
-  100%{transform:translateY(-100vh);opacity:0;}
-}
-
-.confetti {
-  position:fixed;
-  width:10px;
-  height:10px;
-  top:-10px;
-  animation:fall 3s linear forwards;
-}
-
-@keyframes fall {
-  to { transform:translateY(100vh); }
+.showLetter{
+  opacity:1 !important;
+  transform:translateY(0) !important;
 }
 
 #finalLove {
-  font-size:28px;
+  font-size:30px;
   margin-top:20px;
   display:none;
   animation:pulse 1.5s infinite;
@@ -112,6 +112,30 @@ canvas {
   0%{transform:scale(1);}
   50%{transform:scale(1.1);}
   100%{transform:scale(1);}
+}
+
+/* Sparkles */
+.sparkle{
+  position:fixed;
+  font-size:14px;
+  animation:floatUp 4s linear forwards;
+}
+
+@keyframes floatUp{
+  0%{opacity:1; transform:translateY(0);}
+  100%{opacity:0; transform:translateY(-100vh);}
+}
+
+/* Music Button */
+#musicBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  font-size:22px;
+  box-shadow:0 0 20px rgba(255,255,255,0.8);
 }
 </style>
 </head>
@@ -136,8 +160,43 @@ canvas {
 <div id="letter"></div>
 <div id="finalLove">I LOVE YOU ❤️</div>
 
+<audio id="bgMusic" loop>
+  <source src="Samjhawan.mp3" type="audio/mpeg">
+</audio>
+
+<button id="musicBtn">🔊</button>
+
 <script>
+
 let revealed=false;
+const music=document.getElementById("bgMusic");
+const musicBtn=document.getElementById("musicBtn");
+
+music.volume=0; // start muted for fade
+
+function fadeInMusic(){
+  music.play();
+  let vol=0;
+  const fade=setInterval(()=>{
+    if(vol<0.6){
+      vol+=0.02;
+      music.volume=vol;
+    }else{
+      clearInterval(fade);
+    }
+  },100);
+}
+
+function fadeOutMusic(){
+  let fade=setInterval(()=>{
+    if(music.volume>0.05){
+      music.volume-=0.05;
+    }else{
+      music.pause();
+      clearInterval(fade);
+    }
+  },100);
+}
 
 function start(){
   let name=document.getElementById("nameInput").value;
@@ -145,6 +204,8 @@ function start(){
     alert("Enter your name ❤️");
     return;
   }
+
+  fadeInMusic();
 
   document.getElementById("coupon").style.display="block";
   document.getElementById("winnerText").innerHTML="Congratulations "+name+" 💕";
@@ -171,12 +232,12 @@ function setupScratch(name){
     const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
 
     ctx.beginPath();
-    ctx.arc(x,y,25,0,Math.PI*2);
+    ctx.arc(x,y,30,0,Math.PI*2);
     ctx.fill();
 
     scratched++;
 
-    if(scratched>80 && !revealed){
+    if(scratched>100 && !revealed){
       revealed=true;
       reveal(name);
     }
@@ -188,7 +249,7 @@ function setupScratch(name){
 
 function reveal(name){
   document.body.classList.add("dark");
-  createConfetti();
+  createSparkles();
 
   const letter=document.getElementById("letter");
   letter.style.display="block";
@@ -206,7 +267,11 @@ Today is yours.
 And honestly…
 so am I. 💖`;
 
-  typeWriter(letter,text,40);
+  typeWriter(letter,text,35);
+
+  setTimeout(()=>{
+    letter.classList.add("showLetter");
+  },500);
 
   setTimeout(()=>{
     document.getElementById("finalLove").style.display="block";
@@ -225,28 +290,29 @@ function typeWriter(el,text,speed){
   typing();
 }
 
-function createConfetti(){
-  for(let i=0;i<100;i++){
-    const c=document.createElement("div");
-    c.classList.add("confetti");
-    c.style.left=Math.random()*100+"vw";
-    c.style.background=`hsl(${Math.random()*360},100%,70%)`;
-    c.style.animationDuration=(2+Math.random()*2)+"s";
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),3000);
-  }
+function createSparkles(){
+  setInterval(()=>{
+    const s=document.createElement("div");
+    s.classList.add("sparkle");
+    s.innerHTML="✨";
+    s.style.left=Math.random()*100+"vw";
+    s.style.animationDuration=(3+Math.random()*2)+"s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),4000);
+  },300);
 }
 
-setInterval(()=>{
-  const h=document.createElement("div");
-  h.classList.add("heart");
-  h.innerHTML="💖";
-  h.style.left=Math.random()*100+"vw";
-  h.style.animationDuration=(3+Math.random()*3)+"s";
-  document.body.appendChild(h);
-  setTimeout(()=>h.remove(),6000);
-},500);
+musicBtn.addEventListener("click",()=>{
+  if(music.paused){
+    fadeInMusic();
+    musicBtn.innerHTML="🔊";
+  }else{
+    fadeOutMusic();
+    musicBtn.innerHTML="🔇";
+  }
+});
+
 </script>
 
 </body>
-</html>>
+</html>
