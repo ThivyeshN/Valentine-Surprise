@@ -1,99 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Valentine Surprise 💖</title>
+<title>My Valentine 💖</title>
 
 <style>
 body {
-  margin: 0;
-  padding: 0;
+  margin:0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #ff4e8a, #ff9acb);
-  text-align: center;
-  color: white;
-  overflow-x: hidden;
-  transition: background 1.5s ease;
+  text-align:center;
+  background: linear-gradient(135deg,#ff4e8a,#ff9acb);
+  color:white;
+  overflow-x:hidden;
+  transition:1.5s;
 }
 
-.dark-mode {
-  background: radial-gradient(circle at top, #1a001f, #000000);
+.dark {
+  background: radial-gradient(circle at top,#1a001f,#000);
 }
 
-h1 { margin-top: 40px; }
+h1 { margin-top:40px; }
 
 input {
-  padding: 12px;
-  border-radius: 25px;
-  border: none;
-  width: 250px;
-  font-size: 16px;
-  text-align: center;
+  padding:12px;
+  border-radius:25px;
+  border:none;
+  width:250px;
+  text-align:center;
 }
 
 button {
-  padding: 12px 25px;
-  border-radius: 25px;
-  border: none;
-  background: white;
-  color: #ff4e8a;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 15px;
+  padding:12px 25px;
+  border-radius:25px;
+  border:none;
+  background:white;
+  color:#ff4e8a;
+  font-weight:bold;
+  margin-top:15px;
 }
 
 .coupon {
-  margin: 30px auto;
-  width: 320px;
-  height: 180px;
-  background: white;
-  color: #ff4e8a;
-  border-radius: 20px;
-  display: none;
-  padding: 20px;
-  box-shadow: 0 0 30px rgba(255,255,255,0.8);
-  position: relative;
+  margin:30px auto;
+  width:90%;
+  max-width:350px;
+  height:200px;
+  background:white;
+  color:#ff4e8a;
+  border-radius:20px;
+  position:relative;
+  display:none;
+  overflow:hidden;
+  box-shadow:0 0 30px rgba(255,255,255,0.8);
+  animation:glow 2s infinite alternate;
+}
+
+@keyframes glow {
+  from { box-shadow:0 0 20px pink; }
+  to { box-shadow:0 0 40px white; }
 }
 
 canvas {
-  border-radius: 20px;
-  position: absolute;
-  top: 0;
-  left: 0;
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  border-radius:20px;
 }
 
 #letter {
-  max-width: 600px;
-  margin: 30px auto;
-  font-style: italic;
-  display: none;
-  white-space: pre-wrap;
+  max-width:600px;
+  margin:30px auto;
+  display:none;
+  white-space:pre-wrap;
+  font-style:italic;
+  font-size:18px;
 }
 
 .heart {
-  position: fixed;
-  bottom: -10px;
-  font-size: 20px;
-  animation: floatUp 6s linear infinite;
+  position:fixed;
+  bottom:-10px;
+  font-size:20px;
+  animation:float 6s linear infinite;
 }
 
-@keyframes floatUp {
-  0% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(-100vh); opacity: 0; }
+@keyframes float {
+  0%{transform:translateY(0);opacity:1;}
+  100%{transform:translateY(-100vh);opacity:0;}
 }
 
 .confetti {
-  position: fixed;
-  width: 10px;
-  height: 10px;
-  background: pink;
-  top: -10px;
-  animation: fall 3s linear forwards;
+  position:fixed;
+  width:10px;
+  height:10px;
+  top:-10px;
+  animation:fall 3s linear forwards;
 }
 
 @keyframes fall {
-  to { transform: translateY(100vh); }
+  to { transform:translateY(100vh); }
+}
+
+#finalLove {
+  font-size:28px;
+  margin-top:20px;
+  display:none;
+  animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.1);}
+  100%{transform:scale(1);}
 }
 </style>
 </head>
@@ -104,121 +122,131 @@ canvas {
 
 <input type="text" id="nameInput" placeholder="Enter your name">
 <br>
-<button onclick="showCoupon()">Unlock Surprise</button>
+<button onclick="start()">Unlock Surprise</button>
 
 <div class="coupon" id="coupon">
-  <h2 id="couponText"></h2>
-  <p>You won 🎉</p>
-  <h3>1 FULL DAY where I do whatever you say 😌💖</h3>
-  <canvas id="scratchCanvas" width="320" height="180"></canvas>
+  <div style="padding:20px;">
+    <h3 id="winnerText"></h3>
+    <p>You won 🎉</p>
+    <h3>1 FULL DAY where I do whatever you say 😌💖</h3>
+  </div>
+  <canvas id="scratch"></canvas>
 </div>
 
 <div id="letter"></div>
+<div id="finalLove">I LOVE YOU ❤️</div>
 
 <script>
-let scratchedEnough = false;
+let revealed=false;
 
-function showCoupon() {
-  const name = document.getElementById("nameInput").value;
-  if(name.trim() === "") {
-    alert("Enter your name first ❤️");
+function start(){
+  let name=document.getElementById("nameInput").value;
+  if(name.trim()==""){
+    alert("Enter your name ❤️");
     return;
   }
 
-  document.getElementById("coupon").style.display = "block";
-  document.getElementById("couponText").innerHTML =
-    "Congratulations " + name + " 💕";
+  document.getElementById("coupon").style.display="block";
+  document.getElementById("winnerText").innerHTML="Congratulations "+name+" 💕";
 
   setupScratch(name);
 }
 
-function setupScratch(name) {
-  const canvas = document.getElementById("scratchCanvas");
-  const ctx = canvas.getContext("2d");
+function setupScratch(name){
+  const canvas=document.getElementById("scratch");
+  const ctx=canvas.getContext("2d");
 
-  ctx.fillStyle = "#C0C0C0";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
 
-  ctx.globalCompositeOperation = "destination-out";
+  ctx.fillStyle="#C0C0C0";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.globalCompositeOperation="destination-out";
 
-  function scratch(e) {
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+  let scratched=0;
+
+  function scratch(e){
+    const rect=canvas.getBoundingClientRect();
+    const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+    const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
 
     ctx.beginPath();
-    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.arc(x,y,25,0,Math.PI*2);
     ctx.fill();
 
-    if (!scratchedEnough) {
-      scratchedEnough = true;
-      revealLove(name);
+    scratched++;
+
+    if(scratched>80 && !revealed){
+      revealed=true;
+      reveal(name);
     }
   }
 
-  canvas.addEventListener("mousemove", scratch);
-  canvas.addEventListener("touchmove", scratch);
+  canvas.addEventListener("mousemove",scratch);
+  canvas.addEventListener("touchmove",scratch);
 }
 
-function revealLove(name) {
-  document.body.classList.add("dark-mode");
+function reveal(name){
+  document.body.classList.add("dark");
   createConfetti();
 
-  const letter = document.getElementById("letter");
-  letter.style.display = "block";
+  const letter=document.getElementById("letter");
+  letter.style.display="block";
 
-  const message =
-`Dear ${name},
+  const text=`Dear ${name},
 
-From the moment you came into my life,
+From the moment you walked into my life,
 everything became brighter.
 
-You are my peace,
-my happiness,
+You are my happiness,
+my peace,
 my favorite person.
 
-This day is yours.
+Today is yours.
 And honestly…
 so am I. 💖`;
 
-  typeWriter(letter, message, 40);
+  typeWriter(letter,text,40);
+
+  setTimeout(()=>{
+    document.getElementById("finalLove").style.display="block";
+  },5000);
 }
 
-function typeWriter(element, text, speed) {
-  let i = 0;
-  function typing() {
-    if (i < text.length) {
-      element.innerHTML += text.charAt(i);
+function typeWriter(el,text,speed){
+  let i=0;
+  function typing(){
+    if(i<text.length){
+      el.innerHTML+=text.charAt(i);
       i++;
-      setTimeout(typing, speed);
+      setTimeout(typing,speed);
     }
   }
   typing();
 }
 
-function createConfetti() {
-  for(let i=0; i<80; i++) {
-    const conf = document.createElement("div");
-    conf.classList.add("confetti");
-    conf.style.left = Math.random() * 100 + "vw";
-    conf.style.background = `hsl(${Math.random()*360},100%,70%)`;
-    conf.style.animationDuration = (2 + Math.random()*2) + "s";
-    document.body.appendChild(conf);
-    setTimeout(()=>conf.remove(),3000);
+function createConfetti(){
+  for(let i=0;i<100;i++){
+    const c=document.createElement("div");
+    c.classList.add("confetti");
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=`hsl(${Math.random()*360},100%,70%)`;
+    c.style.animationDuration=(2+Math.random()*2)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
   }
 }
 
-// Floating hearts
-setInterval(() => {
-  const heart = document.createElement("div");
-  heart.classList.add("heart");
-  heart.innerHTML = "💖";
-  heart.style.left = Math.random() * 100 + "vw";
-  heart.style.animationDuration = (3 + Math.random() * 3) + "s";
-  document.body.appendChild(heart);
-  setTimeout(() => heart.remove(), 6000);
-}, 500);
+setInterval(()=>{
+  const h=document.createElement("div");
+  h.classList.add("heart");
+  h.innerHTML="💖";
+  h.style.left=Math.random()*100+"vw";
+  h.style.animationDuration=(3+Math.random()*3)+"s";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),6000);
+},500);
 </script>
 
 </body>
-</html>
+</html>>
