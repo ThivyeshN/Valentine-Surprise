@@ -1,230 +1,224 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Valentine Surprise 💖</title>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    text-align:center;
-    background:linear-gradient(135deg,#ff4e8a,#ff9ecb);
-    overflow:hidden;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #ff4e8a, #ff9acb);
+  text-align: center;
+  color: white;
+  overflow-x: hidden;
+  transition: background 1.5s ease;
 }
 
-/* Floating hearts */
-.heart{
-    position:absolute;
-    color:white;
-    font-size:20px;
-    animation:float 6s linear infinite;
+.dark-mode {
+  background: radial-gradient(circle at top, #1a001f, #000000);
 }
 
-@keyframes float{
-    0%{transform:translateY(100vh);opacity:1;}
-    100%{transform:translateY(-10vh);opacity:0;}
+h1 { margin-top: 40px; }
+
+input {
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  width: 250px;
+  font-size: 16px;
+  text-align: center;
 }
 
-.container{
-    position:relative;
-    z-index:2;
-    margin-top:60px;
+button {
+  padding: 12px 25px;
+  border-radius: 25px;
+  border: none;
+  background: white;
+  color: #ff4e8a;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
 }
 
-input{
-    padding:12px;
-    border-radius:10px;
-    border:none;
-    font-size:16px;
-    width:220px;
+.coupon {
+  margin: 30px auto;
+  width: 320px;
+  height: 180px;
+  background: white;
+  color: #ff4e8a;
+  border-radius: 20px;
+  display: none;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(255,255,255,0.8);
+  position: relative;
 }
 
-button{
-    padding:12px 20px;
-    border:none;
-    border-radius:10px;
-    background:#fff;
-    color:#ff4e8a;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
-    transition:0.3s;
+canvas {
+  border-radius: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
-button:hover{
-    transform:scale(1.1);
+#letter {
+  max-width: 600px;
+  margin: 30px auto;
+  font-style: italic;
+  display: none;
+  white-space: pre-wrap;
 }
 
-#couponContainer{
-    display:none;
-    margin-top:30px;
+.heart {
+  position: fixed;
+  bottom: -10px;
+  font-size: 20px;
+  animation: floatUp 6s linear infinite;
 }
 
-#coupon{
-    position:relative;
-    width:90%;
-    max-width:350px;
-    margin:auto;
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-100vh); opacity: 0; }
 }
 
-#couponContent{
-    background:white;
-    padding:30px;
-    border-radius:15px;
-    font-size:18px;
-    color:#ff4e8a;
-    font-weight:bold;
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: pink;
+  top: -10px;
+  animation: fall 3s linear forwards;
 }
 
-canvas{
-    position:absolute;
-    top:0;
-    left:0;
-    border-radius:15px;
-}
-
-#replay{
-    display:none;
-    margin-top:20px;
+@keyframes fall {
+  to { transform: translateY(100vh); }
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-
-<h2>💖 Valentine Surprise 💖</h2>
+<h1>💖 A Special Surprise 💖</h1>
 
 <input type="text" id="nameInput" placeholder="Enter your name">
 <br>
-<button onclick="startSurprise()">Start Surprise</button>
+<button onclick="showCoupon()">Unlock Surprise</button>
 
-<div id="couponContainer">
-    <div id="coupon">
-        <div id="couponContent"></div>
-        <canvas id="scratchCanvas"></canvas>
-    </div>
+<div class="coupon" id="coupon">
+  <h2 id="couponText"></h2>
+  <p>You won 🎉</p>
+  <h3>1 FULL DAY where I do whatever you say 😌💖</h3>
+  <canvas id="scratchCanvas" width="320" height="180"></canvas>
 </div>
 
-<button id="replay" onclick="location.reload()">Replay Surprise 💕</button>
-
-</div>
+<div id="letter"></div>
 
 <script>
-// Floating hearts generator
-function createHeart(){
-    const heart=document.createElement("div");
-    heart.classList.add("heart");
-    heart.innerHTML="❤";
-    heart.style.left=Math.random()*100+"vw";
-    heart.style.fontSize=(Math.random()*20+15)+"px";
-    heart.style.animationDuration=(Math.random()*3+3)+"s";
-    document.body.appendChild(heart);
-    setTimeout(()=>heart.remove(),6000);
-}
-setInterval(createHeart,500);
+let scratchedEnough = false;
 
-// Start surprise
-function startSurprise(){
-    let name=document.getElementById("nameInput").value;
-    if(name.trim()===""){
-        alert("Enter your name first ❤️");
-        return;
-    }
+function showCoupon() {
+  const name = document.getElementById("nameInput").value;
+  if(name.trim() === "") {
+    alert("Enter your name first ❤️");
+    return;
+  }
 
-    document.getElementById("couponContainer").style.display="block";
+  document.getElementById("coupon").style.display = "block";
+  document.getElementById("couponText").innerHTML =
+    "Congratulations " + name + " 💕";
 
-    document.getElementById("couponContent").innerHTML=
-        "🎉 Congratulations " + name + "! 🎉<br><br>" +
-        "You have won:<br><br>" +
-        "💘 1 FULL DAY where I do whatever you say 💘";
-
-    initScratch();
+  setupScratch(name);
 }
 
-// Scratch effect
-function initScratch(){
-    const canvas=document.getElementById("scratchCanvas");
-    const coupon=document.getElementById("coupon");
-    const ctx=canvas.getContext("2d");
+function setupScratch(name) {
+  const canvas = document.getElementById("scratchCanvas");
+  const ctx = canvas.getContext("2d");
 
-    canvas.width=coupon.offsetWidth;
-    canvas.height=coupon.offsetHeight;
+  ctx.fillStyle = "#C0C0C0";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle="#C0C0C0";
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.globalCompositeOperation = "destination-out";
 
-    ctx.fillStyle="#888";
-    ctx.font="20px Arial";
-    ctx.fillText("Scratch Here ❤️", canvas.width/4, canvas.height/2);
+  function scratch(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
-    let isDrawing=false;
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.fill();
 
-    function scratch(e){
-        if(!isDrawing) return;
-        const rect=canvas.getBoundingClientRect();
-        const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
-        const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
-
-        ctx.globalCompositeOperation="destination-out";
-        ctx.beginPath();
-        ctx.arc(x,y,20,0,Math.PI*2);
-        ctx.fill();
+    if (!scratchedEnough) {
+      scratchedEnough = true;
+      revealLove(name);
     }
+  }
 
-    canvas.addEventListener("mousedown",()=>isDrawing=true);
-    canvas.addEventListener("mouseup",()=>{isDrawing=false;checkScratch();});
-    canvas.addEventListener("mousemove",scratch);
-
-    canvas.addEventListener("touchstart",()=>isDrawing=true);
-    canvas.addEventListener("touchend",()=>{isDrawing=false;checkScratch();});
-    canvas.addEventListener("touchmove",scratch);
+  canvas.addEventListener("mousemove", scratch);
+  canvas.addEventListener("touchmove", scratch);
 }
 
-// Check scratch completion
-function checkScratch(){
-    const canvas=document.getElementById("scratchCanvas");
-    const ctx=canvas.getContext("2d");
-    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
-    let count=0;
+function revealLove(name) {
+  document.body.classList.add("dark-mode");
+  createConfetti();
 
-    for(let i=3;i<pixels.data.length;i+=4){
-        if(pixels.data[i]===0) count++;
-    }
+  const letter = document.getElementById("letter");
+  letter.style.display = "block";
 
-    if(count>pixels.data.length/4*0.4){
-        canvas.style.display="none";
-        celebrate();
-    }
+  const message =
+`Dear ${name},
+
+From the moment you came into my life,
+everything became brighter.
+
+You are my peace,
+my happiness,
+my favorite person.
+
+This day is yours.
+And honestly…
+so am I. 💖`;
+
+  typeWriter(letter, message, 40);
 }
 
-// Confetti celebration
-function celebrate(){
-    for(let i=0;i<100;i++){
-        let conf=document.createElement("div");
-        conf.style.position="absolute";
-        conf.style.width="8px";
-        conf.style.height="8px";
-        conf.style.background="white";
-        conf.style.left=Math.random()*100+"vw";
-        conf.style.top="-10px";
-        conf.style.opacity=Math.random();
-        conf.style.animation="fall 3s linear forwards";
-        document.body.appendChild(conf);
-        setTimeout(()=>conf.remove(),3000);
+function typeWriter(element, text, speed) {
+  let i = 0;
+  function typing() {
+    if (i < text.length) {
+      element.innerHTML += text.charAt(i);
+      i++;
+      setTimeout(typing, speed);
     }
-    document.getElementById("replay").style.display="inline-block";
+  }
+  typing();
 }
 
+function createConfetti() {
+  for(let i=0; i<80; i++) {
+    const conf = document.createElement("div");
+    conf.classList.add("confetti");
+    conf.style.left = Math.random() * 100 + "vw";
+    conf.style.background = `hsl(${Math.random()*360},100%,70%)`;
+    conf.style.animationDuration = (2 + Math.random()*2) + "s";
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(),3000);
+  }
+}
+
+// Floating hearts
+setInterval(() => {
+  const heart = document.createElement("div");
+  heart.classList.add("heart");
+  heart.innerHTML = "💖";
+  heart.style.left = Math.random() * 100 + "vw";
+  heart.style.animationDuration = (3 + Math.random() * 3) + "s";
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 6000);
+}, 500);
 </script>
-
-<style>
-@keyframes fall{
-    to{transform:translateY(100vh) rotate(360deg);}
-}
-</style>
 
 </body>
 </html>
