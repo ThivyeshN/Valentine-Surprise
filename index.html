@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valentine Surprise 💖</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    text-align:center;
+    background:linear-gradient(135deg,#ff4e8a,#ff9ecb);
+    overflow:hidden;
+}
+
+/* Floating hearts */
+.heart{
+    position:absolute;
+    color:white;
+    font-size:20px;
+    animation:float 6s linear infinite;
+}
+
+@keyframes float{
+    0%{transform:translateY(100vh);opacity:1;}
+    100%{transform:translateY(-10vh);opacity:0;}
+}
+
+.container{
+    position:relative;
+    z-index:2;
+    margin-top:60px;
+}
+
+input{
+    padding:12px;
+    border-radius:10px;
+    border:none;
+    font-size:16px;
+    width:220px;
+}
+
+button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#fff;
+    color:#ff4e8a;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.1);
+}
+
+#couponContainer{
+    display:none;
+    margin-top:30px;
+}
+
+#coupon{
+    position:relative;
+    width:90%;
+    max-width:350px;
+    margin:auto;
+}
+
+#couponContent{
+    background:white;
+    padding:30px;
+    border-radius:15px;
+    font-size:18px;
+    color:#ff4e8a;
+    font-weight:bold;
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    border-radius:15px;
+}
+
+#replay{
+    display:none;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💖 Valentine Surprise 💖</h2>
+
+<input type="text" id="nameInput" placeholder="Enter your name">
+<br>
+<button onclick="startSurprise()">Start Surprise</button>
+
+<div id="couponContainer">
+    <div id="coupon">
+        <div id="couponContent"></div>
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+</div>
+
+<button id="replay" onclick="location.reload()">Replay Surprise 💕</button>
+
+</div>
+
+<script>
+// Floating hearts generator
+function createHeart(){
+    const heart=document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML="❤";
+    heart.style.left=Math.random()*100+"vw";
+    heart.style.fontSize=(Math.random()*20+15)+"px";
+    heart.style.animationDuration=(Math.random()*3+3)+"s";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),6000);
+}
+setInterval(createHeart,500);
+
+// Start surprise
+function startSurprise(){
+    let name=document.getElementById("nameInput").value;
+    if(name.trim()===""){
+        alert("Enter your name first ❤️");
+        return;
+    }
+
+    document.getElementById("couponContainer").style.display="block";
+
+    document.getElementById("couponContent").innerHTML=
+        "🎉 Congratulations " + name + "! 🎉<br><br>" +
+        "You have won:<br><br>" +
+        "💘 1 FULL DAY where I do whatever you say 💘";
+
+    initScratch();
+}
+
+// Scratch effect
+function initScratch(){
+    const canvas=document.getElementById("scratchCanvas");
+    const coupon=document.getElementById("coupon");
+    const ctx=canvas.getContext("2d");
+
+    canvas.width=coupon.offsetWidth;
+    canvas.height=coupon.offsetHeight;
+
+    ctx.fillStyle="#C0C0C0";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle="#888";
+    ctx.font="20px Arial";
+    ctx.fillText("Scratch Here ❤️", canvas.width/4, canvas.height/2);
+
+    let isDrawing=false;
+
+    function scratch(e){
+        if(!isDrawing) return;
+        const rect=canvas.getBoundingClientRect();
+        const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+        const y=(e.touches?e.touches[0].clientY:e.clientY)-rect.top;
+
+        ctx.globalCompositeOperation="destination-out";
+        ctx.beginPath();
+        ctx.arc(x,y,20,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    canvas.addEventListener("mousedown",()=>isDrawing=true);
+    canvas.addEventListener("mouseup",()=>{isDrawing=false;checkScratch();});
+    canvas.addEventListener("mousemove",scratch);
+
+    canvas.addEventListener("touchstart",()=>isDrawing=true);
+    canvas.addEventListener("touchend",()=>{isDrawing=false;checkScratch();});
+    canvas.addEventListener("touchmove",scratch);
+}
+
+// Check scratch completion
+function checkScratch(){
+    const canvas=document.getElementById("scratchCanvas");
+    const ctx=canvas.getContext("2d");
+    const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+    let count=0;
+
+    for(let i=3;i<pixels.data.length;i+=4){
+        if(pixels.data[i]===0) count++;
+    }
+
+    if(count>pixels.data.length/4*0.4){
+        canvas.style.display="none";
+        celebrate();
+    }
+}
+
+// Confetti celebration
+function celebrate(){
+    for(let i=0;i<100;i++){
+        let conf=document.createElement("div");
+        conf.style.position="absolute";
+        conf.style.width="8px";
+        conf.style.height="8px";
+        conf.style.background="white";
+        conf.style.left=Math.random()*100+"vw";
+        conf.style.top="-10px";
+        conf.style.opacity=Math.random();
+        conf.style.animation="fall 3s linear forwards";
+        document.body.appendChild(conf);
+        setTimeout(()=>conf.remove(),3000);
+    }
+    document.getElementById("replay").style.display="inline-block";
+}
+
+</script>
+
+<style>
+@keyframes fall{
+    to{transform:translateY(100vh) rotate(360deg);}
+}
+</style>
+
+</body>
+</html>
